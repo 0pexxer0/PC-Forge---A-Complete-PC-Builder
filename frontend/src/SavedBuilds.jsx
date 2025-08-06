@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-
+import './App.css'; // Import the stylesheet
 
 function SavedBuilds() {
   const [builds, setBuilds] = useState([]);
@@ -10,9 +10,12 @@ function SavedBuilds() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Use the environment variable for the API URL
+  const API_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     setLoading(true);
-    axios.get('http://localhost:5000/api/builds')
+    axios.get(`${API_URL}/api/builds`)
       .then(response => {
         setBuilds(response.data);
         setLoading(false);
@@ -29,7 +32,7 @@ function SavedBuilds() {
     if (!searchTerm.trim()) return;
     setLoading(true);
     setError('');
-    axios.get(`http://localhost:5000/api/builds/search/${searchTerm.trim()}`)
+    axios.get(`${API_URL}/api/builds/search/${searchTerm.trim()}`)
       .then(response => {
         setSearchResults([response.data]);
         setLoading(false);
@@ -41,18 +44,17 @@ function SavedBuilds() {
         setLoading(false);
       });
   };
-
+  
   const clearSearch = () => {
     setSearchTerm('');
     setSearchResults(null);
     setError('');
   }
-
   
   const handleDelete = async (buildIdToDelete) => {
     if (window.confirm('Are you sure you want to permanently delete this build?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/builds/${buildIdToDelete}`);
+        await axios.delete(`${API_URL}/api/builds/${buildIdToDelete}`);
         setBuilds(currentBuilds => currentBuilds.filter(build => build._id !== buildIdToDelete));
         if (searchResults) {
           setSearchResults(currentResults => currentResults.filter(build => build._id !== buildIdToDelete));
@@ -95,7 +97,6 @@ function SavedBuilds() {
           <div key={build._id} style={styles.card}>
             <div style={styles.cardHeader}>
               <h2 style={styles.cardTitle}>{build.buildName}</h2>
-              {/* ## NEW DELETE BUTTON ## */}
               <button onClick={() => handleDelete(build._id)} style={styles.deleteButton}>&times;</button>
             </div>
             <p style={styles.cardUid}>UID: {build.uid}</p>
